@@ -1,0 +1,26 @@
+1064:  bid(0, {from: accounts[1], value:    10000000000}) 1318:  chocoPowerFundingCrowd({ from: accounts[1] })
+1073:  bid(0, {from: accounts[2], value:    20000000000}) 1132:  withdrawPendings({ from: accounts[2] })
+1094:  rebid(0, { from: accounts[1], value: 10000000001 })
+1168:  bid(1, { from: accounts[5], value:   20000000000 })
+1192:  bid(0, { from: accounts[2], value:   40000000000 }) 1201:  withdrawPendings({ from: accounts[2] })
+1196:  bid(0, { from: accounts[3], value:   50000000000 })
+1210:  bid(1, { from: accounts[6], value:   30000000000 })
+1234:  bid(1, { from: accounts[7], value:   20000000000})
+1290:  rebid(1, { from: accounts[7], value: 50000000000 })
+1338:  bid(0, { from: accounts[8],   value: 150000000000 }) 1342:  chocoPowerFundingCrowd({ from: accounts[8] })
+1347:                         assert(balance.toNumber() == 340000000001)
+1368:  bid(1, { from: accounts[9], value:                  300000000000 })
+1380:  rebid(1, { from: accounts[7], value:                200000000000 })
+
+=================================================================================================================
+
+1064:  bid(0, {from: accounts[1], value:    10000000000}) 1318:  chocoPowerFundingCrowd({ from: accounts[1] })
+1168:  bid(1, { from: accounts[5], value:   20000000000 })
+1210:  bid(1, { from: accounts[6], value:   30000000000 })
+1234:  bid(1, { from: accounts[7], value:   20000000000 })
+1290:  rebid(1, { from: accounts[7], value: 50000000000 })
+1338:  bid(0, { from: accounts[8],  value: 150000000000 }) 1342:  chocoPowerFundingCrowd({ from: accounts[8] })
+1366:  bid(1, { from: accounts[9], value:  300000000000 })
+1378: rebid(1, { from: accounts[7], value: 200000000000 })
+
+20000000000 + 50000000000 + 200000000000
