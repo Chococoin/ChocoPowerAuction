@@ -15,7 +15,7 @@ contract('chocoPowerAuction_v1', (accounts) => {
   });
   it('Beneficiary is sender', async () => {
       const beneficiary = await chocoPowerAuction.beneficiary()
-      assert(beneficiary == accounts[0]);
+      assert(beneficiary === accounts[0]);
   });
   it('Higgest Bid must be 0', async () => {
       highestBid = await chocoPowerAuction.highestBid.call({ from: accounts[2] });
@@ -24,6 +24,10 @@ contract('chocoPowerAuction_v1', (accounts) => {
   it('Higgest Bidder must be undefined', async () => {
       highestBidder = await chocoPowerAuction.highestBidder.call({ from: accounts[1] });
       assert(highestBidder === ZERO_ADDR);
+  });
+  it('CrowdsPot is assigned', async () => {
+      crowdsPot = await chocoPowerAuction.crowdsPot( { from: account[5]});
+      assert(crowdsPot === accounts[0]);
   });
   it('Receiving properly a bid', async () => {
       await chocoPowerAuction.bid({from: accounts[1], value: 100000000000});
