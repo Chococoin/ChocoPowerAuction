@@ -6,7 +6,8 @@ const now = Math.floor((Date.now()) / 1000);
 const Fri_Nov_01_00_00_UTC_2019 = 1572566400;
 
 var chocoPowerAuction, chocoPowerAuction2, highestBid, highestBidder, auctionEnd,
-bid, rebid, myPendingFunds, isClosed, balance, snapShot, crowdsPot;
+bid, rebid, myPendingFunds, isClosed, balance, snapShot, crowdsPot, crowdAmount,
+withdrawn, crowdWinning;
 
 contract('chocoPowerAuction_v1', (accounts) => {
   it('Deploy the Smart Contract', async () => {
@@ -29,6 +30,18 @@ contract('chocoPowerAuction_v1', (accounts) => {
       crowdsPot = await chocoPowerAuction.crowdsPot( { from: accounts[5]});
       assert(crowdsPot === accounts[0]);
   });
+  it('crowdWinning is false 1/4', async () => {
+    crowdWinning = await chocoPowerAuction.crowdWinning( { from: accounts[5]});
+    assert(!crowdWinning);
+  });
+  it('crowdAmount must be zero 1/2', async () => {
+    crowdAmount = await chocoPowerAuction.crowdAmount({ from: accounts[4] });
+    assert(crowdAmount.toNumber() === 0);
+  });
+  it('withdrawn must be zero 1/3', async () => {
+    withdrawn = await chocoPowerAuction.withdrawn({ from: accounts[4] });
+    assert(withdrawn.toNumber() === 0);
+  });
   it('Receiving properly a lone bid', async () => {
       await chocoPowerAuction.bid(0, {from: accounts[1], value: 100000000000});
       highestBid = await chocoPowerAuction.highestBid.call({ from: accounts[2] });
@@ -43,7 +56,7 @@ contract('chocoPowerAuction_v1', (accounts) => {
       highestBid = await chocoPowerAuction.highestBid.call({ from: accounts[0] });
       assert(highestBid.toNumber() === 200000000000);
   });
-  it('Set properly new highest bidder', async () => {
+  it('Set properly new highest lone bidder', async () => {
       highestBidder = await chocoPowerAuction.highestBidder.call({ from: accounts[0] });
       assert(highestBidder === accounts[2]);
   });
@@ -92,7 +105,7 @@ contract('chocoPowerAuction_v1', (accounts) => {
       myPendingFunds = await chocoPowerAuction.myPendingFunds({ from: accounts[1] });
       assert(myPendingFunds.toNumber() === 0);
   });
-  it('Lower bidder withdraw pendings funds', async () => {
+  it('Lower lone bidder withdraw pendings funds', async () => {
       myPendingFunds = await chocoPowerAuction.myPendingFunds({ from: accounts[2] });
       withdrawPendings = await chocoPowerAuction.withdrawPendings.call({ from: accounts[2] });
       await chocoPowerAuction.withdrawPendings({ from: accounts[2] });
@@ -116,7 +129,26 @@ contract('chocoPowerAuction_v1', (accounts) => {
         assert(e.message === Errors[9]);
     }
   });
-  it('Admin cannot withdraw and close until millestone reached', async () => {
+  it('crowdAmount must be zero 2/2', async () => {
+      crowdAmount = await chocoPowerAuction.crowdAmount({ from: accounts[4] });
+      assert(crowdAmount.toNumber() === 0);
+  });
+  it('crowdWinning is false 2/4', async () => {
+      crowdWinning = await chocoPowerAuction.crowdWinning( { from: accounts[5]});
+      assert(!crowdWinning);
+  });
+  it('First crow bider enter to play', async () => {
+      bid = chocoPowerAuction.bid(1, { from: accounts[5], value: 200000000000 })
+  });
+  it('crowdAmount has change properly', async () => {
+      crowdAmount = await chocoPowerAuction.crowdAmount({ from: accounts[0] });
+      assert(crowdAmount.toNumber() === 200000000000);
+  });
+  it('crowdWinning is false 3/4', async () => {
+    crowdWinning = await chocoPowerAuction.crowdWinning( { from: accounts[5]});
+    assert(!crowdWinning);
+ });
+  it('Admin cannot withdraw and close until close date is reached', async () => {
     try {
       auctionEnd = await chocoPowerAuction.auctionEnd();
     } catch(e) {
@@ -138,8 +170,52 @@ contract('chocoPowerAuction_v1', (accounts) => {
   });
   it('New balance of exit bidder', async () => {
       withdrawPendings = await chocoPowerAuction.withdrawPendings({ from: accounts[2] });
-      balance = await chocoPowerAuction.myPendingFunds({ from: accounts[2] });
-      assert(balance.toNumber() === 0);
+      myPendingFunds = await chocoPowerAuction.myPendingFunds({ from: accounts[2] });
+      assert(myPendingFunds.toNumber() === 0);
+  });
+  it('New crowd bidder enters', async () => {
+      bid = await chocoPowerAuction.bid(1, { from: accounts[6], value: 300000000000});
+      assert(bid.receipt.status);
+  });
+  it('highbid is correct', async () => {
+      highestBid = await chocoPowerAuction.highestBid();
+      assert(highestBid.toNumber() == 500000000000);
+  });
+  it('crowdAmount is correct', async () => {
+      crowdAmount = await chocoPowerAuction.crowdAmount({ from: accounts[7] });
+      assert(crowdAmount == 500000000000);
+  })
+  it('crowdWinning is false', async () => {
+    crowdWinning = await chocoPowerAuction.crowdWinning({ from: accounts[3] });
+    assert(!crowdWinning);
+  });
+  it('highestBidder is correct', async () => {
+      balance = await chocoPowerAuction.balance( { from: accounts[0] });
+      console.log(balance.toNumber());
+      highestBidder = await chocoPowerAuction.highestBidder({ from: accounts[1] });
+      assert(highestBidder == accounts[3]);
+  });
+  it('Third crowd bidder enters', async () => {
+      bid = await chocoPowerAuction.bid(1, { from: accounts[7], value: 200000000000});
+      assert(bid.receipt.status);
+  });
+  it('crowdAmount is correct', async () => {
+      crowdAmount = await chocoPowerAuction.crowdAmount();
+      assert(crowdAmount.toNumber() == 700000000000);
+  });
+  it('highbid is correct', async () => {
+      highestBid = await chocoPowerAuction.highestBid();
+      assert(highestBid.toNumber() == 700000000000);
+  });
+  it('crowdWinning is true', async () => {
+      crowdWinning = await chocoPowerAuction.crowdWinning({ from: accounts[3] });
+      assert(crowdWinning);
+  });
+  it('highestBidder is correct', async () => {
+      balance = await chocoPowerAuction.balance( { from: accounts[0] });
+      console.log(balance.toNumber());
+      highestBidder = await chocoPowerAuction.highestBidder({ from: accounts[1] });
+      assert(highestBidder == accounts[0]);
   });
   it('Set moment before end of auction', async () => {
       snapShot = await Utils.takeSnapshot();
@@ -184,11 +260,11 @@ contract('chocoPowerAuction_v1', (accounts) => {
       withdrawPendings = await chocoPowerAuction.withdrawPendings({ from: accounts[1] });
       assert(withdrawPendings.receipt.status);
   });
-  it('Benificiary take higgest bid 1/2', async () => {
+  it('Beneficiary take higgest bid 1/2', async () => {
       auctionEnd = await chocoPowerAuction.auctionEnd.call({ from: accounts[0] });
       assert(auctionEnd);
   });
-  it('Benificiary take higgest bid 2/2', async () => {
+  it('Beneficiary take higgest bid 2/2', async () => {
       auctionEnd = await chocoPowerAuction.auctionEnd({ from: accounts[0] });
       assert(auctionEnd.receipt.status);
   });
