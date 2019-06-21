@@ -194,18 +194,16 @@ contract ChocoPowerAuction{
         );
         if(highestBid >= millestone){
             require(pendingReturns[msg.sender].kind == Fund.lone,
-              "After reached the millestone only lone funders can reatire funds");
+            "After reached the millestone only lone funders can retire funds");
         }
         uint amount = pendingReturns[msg.sender].amount;
-        if (amount > 0) {
-            pendingReturns[msg.sender].amount = 0;
-            if (!msg.sender.send(amount)) {
-                pendingReturns[msg.sender].amount = amount;
-                if(pendingReturns[msg.sender].kind == Fund.crowd){
-                    crowdAmount -= amount;
-                }
-                return 0;
-            }
+        pendingReturns[msg.sender].amount = 0;
+        if (!msg.sender.send(amount)) {
+            pendingReturns[msg.sender].amount = amount;
+            return 0;
+        }
+        if(pendingReturns[msg.sender].kind == Fund.crowd){
+            crowdAmount -= amount;
         }
         return amount;
     }
