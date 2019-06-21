@@ -7,7 +7,7 @@ contract ChocoPowerAuction{
     uint public highestBid;
     uint public crowdAmount;
     uint public withdrawn;
-    uint first_millestone;
+    uint millestone;
     //uint Fri_Nov_01_00_00_UTC_2019 = 1572566400;
     uint Fri_Nov_01_00_00_UTC_2019 = 600;
     uint endAuctionDay;
@@ -37,7 +37,8 @@ contract ChocoPowerAuction{
         beneficiary = msg.sender;
         crowdsPot = msg.sender;
         crowdAmount = 0;
-        first_millestone = 100 ether;
+        //millestone = 100 ether;
+        millestone = 100 ether;
         // Señala la fecha de culminacion de la subasta.
         //endAuctionDay = Fri_Nov_01_00_00_UTC_2019;
         endAuctionDay = now + Fri_Nov_01_00_00_UTC_2019;
@@ -104,7 +105,7 @@ contract ChocoPowerAuction{
             require(msg.sender != highestBidder,
               "HighestBidder cannot make rebidding");
             require(pendingReturns[msg.sender].amount > 0,
-              "You don't have a pending found, make a bid instead");
+              "You don't have pending founds, make a bid instead");
             require(msg.value + pendingReturns[msg.sender].amount > highestBid,
               "The amount is not enough to overcome the highestBid");
               if(highestBidder != crowdsPot) {
@@ -156,7 +157,7 @@ contract ChocoPowerAuction{
     }
 
     function takeMillestone() internal {
-        if(first_millestone < highestBid){
+        if(millestone < highestBid){
             uint advance = highestBid - withdrawn;
             if(advance%10 == 0) {
                 if (beneficiary.send(advance)){
@@ -191,7 +192,7 @@ contract ChocoPowerAuction{
         require(pendingReturns[msg.sender].amount > 0,
         "You don't have any funds on this contract"
         );
-        if(highestBid >= first_millestone){
+        if(highestBid >= millestone){
             require(pendingReturns[msg.sender].kind == Fund.lone,
               "After reached the millestone only lone funders can reatire funds");
         }
