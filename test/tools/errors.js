@@ -6,5 +6,5 @@ module.exports = { "1": "Returned error: VM Exception while processing transacti
                    "6": "Returned error: VM Exception while processing transaction: revert Is too late to make a bid. The auction has ended -- Reason given: Is too late to make a bid. The auction has ended.",
                    "7": "Returned error: VM Exception while processing transaction: revert You don't have any funds on this contract -- Reason given: You don't have any funds on this contract.",
                    "8": "Returned error: VM Exception while processing transaction: revert Only beneficiary can call this function -- Reason given: Only beneficiary can call this function.",
-                   "9": "Returned error: VM Exception while processing transaction: revert You don't have pending founds, make a bid instead -- Reason given: You don't have pending founds, make a bid instead."
+                   "9": "Returned error: VM Exception while processing transaction: revert You don't have pending founds, make a bid instead -- Reason given: You don't have pending founds, make a bid instead.",
                  };
