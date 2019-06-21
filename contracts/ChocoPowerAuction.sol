@@ -38,7 +38,7 @@ contract ChocoPowerAuction{
         crowdsPot = msg.sender;
         crowdAmount = 0;
         //millestone = 100 ether;
-        millestone = 100 ether;
+        millestone = 1 szabo;
         // Señala la fecha de culminacion de la subasta.
         //endAuctionDay = Fri_Nov_01_00_00_UTC_2019;
         endAuctionDay = now + Fri_Nov_01_00_00_UTC_2019;
@@ -151,17 +151,17 @@ contract ChocoPowerAuction{
         require(block.timestamp > endAuctionDay,
           "Auction isn't ended yet");
         emit AuctionEnded(highestBidder, highestBid);
-        beneficiary.transfer(highestBid-withdrawn);
+        beneficiary.transfer(highestBid - withdrawn);
         closeIt();
         return true;
     }
 
     function takeMillestone() internal {
-        if(millestone < highestBid){
+        if(highestBid > millestone){
             uint advance = highestBid - withdrawn;
-            if(advance%10 == 0) {
+            if(advance > 100) {
                 if (beneficiary.send(advance)){
-                    withdrawn += advance;
+                  withdrawn += advance;
                 }
             }
         }
@@ -208,5 +208,9 @@ contract ChocoPowerAuction{
             }
         }
         return amount;
+    }
+
+    function balance() public view returns (uint){
+      return address(this).balance;
     }
 }
