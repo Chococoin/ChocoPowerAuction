@@ -7,4 +7,6 @@ module.exports = { "1": "Returned error: VM Exception while processing transacti
                    "7": "Returned error: VM Exception while processing transaction: revert You don't have any funds on this contract -- Reason given: You don't have any funds on this contract.",
                    "8": "Returned error: VM Exception while processing transaction: revert Only beneficiary can call this function -- Reason given: Only beneficiary can call this function.",
                    "9": "Returned error: VM Exception while processing transaction: revert You don't have pending founds, make a bid instead -- Reason given: You don't have pending founds, make a bid instead.",
+                   "10": "Returned error: VM Exception while processing transaction: revert Only lone funders can retire pending funds before end of auction -- Reason given: Only lone funders can retire pending funds before end of auction.",
+                   "11": "Returned error: VM Exception while processing transaction: revert Auction isn't ended yet",
                  };

@@ -88,14 +88,18 @@ contract ChocoPowerAuction{
     function chocoPowerFundingCrowd() public returns(bool) {
         require(pendingReturns[msg.sender].kind == Fund.lone,
           "Kind of fund isn't lone");
-        require(pendingReturns[msg.sender].amount > 0,
+        require(pendingReturns[msg.sender].amount > 0 || msg.sender == highestBidder,
           "Pending funds must be greater than Zero");
         pendingReturns[msg.sender].kind = Fund.crowd;
         crowdAmount += pendingReturns[msg.sender].amount;
         if(highestBidder == msg.sender){
+            pendingReturns[msg.sender] = Funder({ amount: highestBid, kind: Fund.crowd });
             highestBidder = crowdsPot;
             highestBid = crowdAmount;
             crowdWinning = true;
+        }
+        if(highestBidder == crowdsPot) {
+            highestBid += pendingReturns[msg.sender].amount;
         }
         return true;
     }
@@ -190,20 +194,14 @@ contract ChocoPowerAuction{
 
     function withdrawPendings() public returns(uint){
         require(pendingReturns[msg.sender].amount > 0,
-        "You don't have any funds on this contract"
-        );
-        if(highestBid >= millestone){
-            require(pendingReturns[msg.sender].kind == Fund.lone,
-            "After reached the millestone only lone funders can retire funds");
-        }
+          "You don't have any funds on this contract");
+        require(pendingReturns[msg.sender].kind == Fund.lone,
+          "Only lone funders can retire pending funds before end of auction");
         uint amount = pendingReturns[msg.sender].amount;
         pendingReturns[msg.sender].amount = 0;
         if (!msg.sender.send(amount)) {
             pendingReturns[msg.sender].amount = amount;
             return 0;
-        }
-        if(pendingReturns[msg.sender].kind == Fund.crowd){
-            crowdAmount -= amount;
         }
         return amount;
     }
