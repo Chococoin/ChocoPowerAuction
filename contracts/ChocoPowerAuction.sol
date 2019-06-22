@@ -38,7 +38,7 @@ contract ChocoPowerAuction{
         crowdsPot = msg.sender;
         crowdAmount = 0;
         //millestone = 100 ether;
-        millestone = 1 szabo;
+        millestone = 0.1 szabo;
         // Señala la fecha de culminacion de la subasta.
         //endAuctionDay = Fri_Nov_01_00_00_UTC_2019;
         endAuctionDay = now + Fri_Nov_01_00_00_UTC_2019;
@@ -132,7 +132,8 @@ contract ChocoPowerAuction{
             require(msg.value > 0,
               "You need send a amount greater than zero.");
             crowdAmount += msg.value;
-            pendingReturns[msg.sender] = Funder({ amount: msg.value, kind: Fund.crowd });
+            pendingReturns[msg.sender] = Funder({ amount: pendingReturns[msg.sender].amount + msg.value,
+                                                  kind: Fund.crowd });
             if(crowdAmount > highestBid) {
                 if(highestBidder != crowdsPot) {
                     pendingReturns[highestBidder] = Funder({ amount: highestBid, kind: Fund.lone });
@@ -195,13 +196,22 @@ contract ChocoPowerAuction{
     function withdrawPendings() public returns(uint){
         require(pendingReturns[msg.sender].amount > 0,
           "You don't have any funds on this contract");
-        require(pendingReturns[msg.sender].kind == Fund.lone,
-          "Only lone funders can retire pending funds before end of auction");
+        if (open) {
+            require(pendingReturns[msg.sender].kind == Fund.lone,
+              "Only lone funders can retire pending funds before end of auction");
+        }
+        if (!open) {
+            require(msg.sender != highestBidder, 
+              "You are the winner! The price is yours");
+        }
         uint amount = pendingReturns[msg.sender].amount;
         pendingReturns[msg.sender].amount = 0;
         if (!msg.sender.send(amount)) {
             pendingReturns[msg.sender].amount = amount;
             return 0;
+        }
+        if (pendingReturns[msg.sender].kind == Fund.crowd && open == false){
+            crowdAmount -= amount;
         }
         return amount;
     }
