@@ -80,7 +80,7 @@ contract ChocoPowerAuction{
             }
         }
         emit HighestBidIncreased(highestBidder, highestBid);
-        takeMillestone();
+        //takeMillestone();
         closeIt();
         return true;
     }
@@ -144,7 +144,7 @@ contract ChocoPowerAuction{
             }
         }
         emit HighestBidIncreased(highestBidder, highestBid);
-        takeMillestone();
+        //takeMillestone();
         closeIt();
         return true;
     }
@@ -164,7 +164,7 @@ contract ChocoPowerAuction{
     function takeMillestone() internal {
         if(highestBid > millestone){
             uint advance = highestBid - withdrawn;
-            if(advance > 100) {
+            if(advance > 250000000000) {
                 if (beneficiary.send(advance)){
                   withdrawn += advance;
                 }
