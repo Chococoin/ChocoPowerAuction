@@ -86,20 +86,22 @@ contract ChocoPowerAuction{
     }
 
     function chocoPowerFundingCrowd() public returns(bool) {
+        require(msg.sender != beneficiary,
+          "Beneficiary cannot use this function");
         require(pendingReturns[msg.sender].kind == Fund.lone,
           "Kind of fund isn't lone");
         require(pendingReturns[msg.sender].amount > 0 || msg.sender == highestBidder,
           "Pending funds must be greater than Zero");
         pendingReturns[msg.sender].kind = Fund.crowd;
         crowdAmount += pendingReturns[msg.sender].amount;
+        if(highestBidder == crowdsPot) {
+            highestBid += pendingReturns[msg.sender].amount;
+        }
         if(highestBidder == msg.sender){
             pendingReturns[msg.sender] = Funder({ amount: highestBid, kind: Fund.crowd });
             highestBidder = crowdsPot;
-            highestBid = crowdAmount;
+            highestBid += crowdAmount;
             crowdWinning = true;
-        }
-        if(highestBidder == crowdsPot) {
-            highestBid += pendingReturns[msg.sender].amount;
         }
         return true;
     }
@@ -151,14 +153,13 @@ contract ChocoPowerAuction{
 
     function auctionEnd() public returns(bool){
         require(msg.sender == beneficiary,
-        "Only beneficiary can call this function"
-        );
+          "Only beneficiary can call this function");
         require(block.timestamp > endAuctionDay,
           "Auction isn't ended yet");
         if(highestBid > withdrawn) {
           if (beneficiary.send(highestBid - withdrawn)){
-              withdrawn = highestBid;
-              emit AuctionEnded(highestBidder, highestBid);
+            withdrawn = highestBid;
+            emit AuctionEnded(highestBidder, highestBid);
           }
         }
         closeIt();
@@ -198,17 +199,17 @@ contract ChocoPowerAuction{
     }
 
     function withdrawPendings() public returns(uint){
+        if (!open) {
+            require(msg.sender != highestBidder,
+              "You are the winner! The price is yours");
+        }
         require(msg.sender != beneficiary,
-          "beneficiary cannot use this function");
+          "Beneficiary cannot use this function");
         require(pendingReturns[msg.sender].amount > 0,
           "You don't have any funds on this contract");
         if (open) {
             require(pendingReturns[msg.sender].kind == Fund.lone,
               "Only lone funders can retire pending funds before end of auction");
-        }
-        if (!open) {
-            require(msg.sender != highestBidder,
-              "You are the winner! The price is yours");
         }
         uint amount = pendingReturns[msg.sender].amount;
         pendingReturns[msg.sender].amount = 0;

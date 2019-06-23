@@ -9,5 +9,6 @@ module.exports = { "1": "Returned error: VM Exception while processing transacti
                    "9": "Returned error: VM Exception while processing transaction: revert You don't have pending founds, make a bid instead -- Reason given: You don't have pending founds, make a bid instead.",
                    "10": "Returned error: VM Exception while processing transaction: revert Only lone funders can retire pending funds before end of auction -- Reason given: Only lone funders can retire pending funds before end of auction.",
                    "11": "Returned error: VM Exception while processing transaction: revert Auction isn't ended yet",
-                   "12": "Returned error: from not found; is required -- Reason given: beneficiary cannot use this function."
+                   "12": "Returned error: VM Exception while processing transaction: revert Beneficiary cannot use this function -- Reason given: Beneficiary cannot use this function.",
+                   "13": "Returned error: VM Exception while processing transaction: revert You are the winner! The price is yours -- Reason given: You are the winner! The price is yours."
                  };
