@@ -4,9 +4,10 @@ module.exports = { "1": "Returned error: VM Exception while processing transacti
                    "4": "Returned error: VM Exception while processing transaction: revert This function only work if you have a overcame bid -- Reason given: This function only work if you have a overcame bid.",
                    "5": "Returned error: VM Exception while processing transaction: revert Auction isn't ended yet -- Reason given: Auction isn't ended yet.",
                    "6": "Returned error: VM Exception while processing transaction: revert Is too late to make a bid. The auction has ended -- Reason given: Is too late to make a bid. The auction has ended.",
-                   "7": "Returned error: from not found; is required -- Reason given: You don't have any funds on this contract.",
+                   "7": "Returned error: VM Exception while processing transaction: revert You don't have any funds on this contract -- Reason given: You don't have any funds on this contract.",
                    "8": "Returned error: VM Exception while processing transaction: revert Only beneficiary can call this function -- Reason given: Only beneficiary can call this function.",
                    "9": "Returned error: VM Exception while processing transaction: revert You don't have pending founds, make a bid instead -- Reason given: You don't have pending founds, make a bid instead.",
                    "10": "Returned error: VM Exception while processing transaction: revert Only lone funders can retire pending funds before end of auction -- Reason given: Only lone funders can retire pending funds before end of auction.",
                    "11": "Returned error: VM Exception while processing transaction: revert Auction isn't ended yet",
+                   "12": "Returned error: from not found; is required -- Reason given: beneficiary cannot use this function."
                  };

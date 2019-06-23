@@ -155,8 +155,12 @@ contract ChocoPowerAuction{
         );
         require(block.timestamp > endAuctionDay,
           "Auction isn't ended yet");
-        emit AuctionEnded(highestBidder, highestBid);
-        beneficiary.transfer(highestBid - withdrawn);
+        if(highestBid > withdrawn) {
+          if (beneficiary.send(highestBid - withdrawn)){
+              withdrawn = highestBid;
+              emit AuctionEnded(highestBidder, highestBid);
+          }
+        }
         closeIt();
         return true;
     }
@@ -194,6 +198,8 @@ contract ChocoPowerAuction{
     }
 
     function withdrawPendings() public returns(uint){
+        require(msg.sender != beneficiary,
+          "beneficiary cannot use this function");
         require(pendingReturns[msg.sender].amount > 0,
           "You don't have any funds on this contract");
         if (open) {
@@ -201,7 +207,7 @@ contract ChocoPowerAuction{
               "Only lone funders can retire pending funds before end of auction");
         }
         if (!open) {
-            require(msg.sender != highestBidder, 
+            require(msg.sender != highestBidder,
               "You are the winner! The price is yours");
         }
         uint amount = pendingReturns[msg.sender].amount;
