@@ -38,30 +38,30 @@ contract ChocoPowerAuction{
         crowdsPot = msg.sender;
         crowdAmount = 0;
         //millestone = 100 ether;
-        millestone = 1 szabo;
+        millestone = 10000 wei;
         // Señala la fecha de culminacion de la subasta.
         //endAuctionDay = Fri_Nov_01_00_00_UTC_2019;
         endAuctionDay = now + Fri_Nov_01_00_00_UTC_2019;
     }
 
     function bid(Fund _kind) public payable isOpen returns(bool){
-        if(_kind == Fund.lone){
+        if (_kind == Fund.lone) {
             require(msg.sender != highestBidder,
               "HighestBidder cannot make rebidding");
             require(pendingReturns[msg.sender].amount == 0,
               "You have a pending found, make rebidding");
             require(msg.value > highestBid,
               "The amount is not enough to overcome the previous bid");
-              if(highestBidder != crowdsPot) {
+              if (highestBidder != crowdsPot) {
                 pendingReturns[highestBidder] = Funder({ amount: highestBid, kind: Fund.lone });
               }
               highestBid = msg.value;
               highestBidder = msg.sender;
-              if(crowdWinning){
+              if (crowdWinning) {
                 crowdWinning = false;
               }
         }
-        if(_kind == Fund.crowd){
+        if (_kind == Fund.crowd) {
             require(msg.sender != highestBidder,
               "You have a previos bid as lone. Use chocoPowerFundingCrowd to change type");
             require(pendingReturns[msg.sender].amount == 0,
@@ -86,13 +86,22 @@ contract ChocoPowerAuction{
     }
 
     function chocoPowerFundingCrowd() public returns(bool) {
+        require(msg.sender != beneficiary,
+          "Beneficiary cannot use this function");
         require(pendingReturns[msg.sender].kind == Fund.lone,
           "Kind of fund isn't lone");
-        require(pendingReturns[msg.sender].amount > 0,
+        require(pendingReturns[msg.sender].amount > 0 || msg.sender == highestBidder,
           "Pending funds must be greater than Zero");
         pendingReturns[msg.sender].kind = Fund.crowd;
-        crowdAmount += pendingReturns[msg.sender].amount;
-        if(highestBidder == msg.sender){
+        if (pendingReturns[msg.sender].amount > 0) {
+            crowdAmount += pendingReturns[msg.sender].amount;
+        }
+        if (highestBidder == crowdsPot) {
+            highestBid += pendingReturns[msg.sender].amount;
+        }
+        if (highestBidder == msg.sender) {
+            pendingReturns[msg.sender] = Funder({ amount: highestBid, kind: Fund.crowd });
+            crowdAmount += highestBid;
             highestBidder = crowdsPot;
             highestBid = crowdAmount;
             crowdWinning = true;
@@ -101,7 +110,9 @@ contract ChocoPowerAuction{
     }
 
     function rebid(Fund _kind) public payable isOpen returns(bool){
-        if(_kind == Fund.lone){
+        require(pendingReturns[msg.sender].kind == _kind,
+          "You have to rebid using the same kind of your bid as argument");
+        if (_kind == Fund.lone) {
             require(msg.sender != highestBidder,
               "HighestBidder cannot make rebidding");
             require(pendingReturns[msg.sender].amount > 0,
@@ -111,14 +122,14 @@ contract ChocoPowerAuction{
               if(highestBidder != crowdsPot) {
                 pendingReturns[highestBidder] = Funder({ amount: highestBid, kind: Fund.lone });
               }
-              if(crowdWinning){
-                  crowdWinning == false;
+              if (crowdWinning) {
+                  crowdWinning = false;
               }
               highestBid = msg.value + pendingReturns[msg.sender].amount;
               highestBidder = msg.sender;
               pendingReturns[msg.sender] = Funder({ amount: 0, kind: Fund.lone });
         }
-        if(_kind == Fund.crowd){
+        if (_kind == Fund.crowd) {
             require(msg.sender != highestBidder,
               "You have a previous bid as lone. Use chocoPowerFundingCrowd to change type");
             require(pendingReturns[msg.sender].amount > 0,
@@ -128,8 +139,9 @@ contract ChocoPowerAuction{
             require(msg.value > 0,
               "You need send a amount greater than zero.");
             crowdAmount += msg.value;
-            pendingReturns[msg.sender] = Funder({ amount: msg.value, kind: Fund.crowd });
-            if(crowdAmount > highestBid) {
+            pendingReturns[msg.sender] = Funder({ amount: pendingReturns[msg.sender].amount + msg.value,
+                                                  kind: Fund.crowd });
+            if (crowdAmount > highestBid) {
                 if(highestBidder != crowdsPot) {
                     pendingReturns[highestBidder] = Funder({ amount: highestBid, kind: Fund.lone });
                     highestBidder = crowdsPot;
@@ -146,21 +158,30 @@ contract ChocoPowerAuction{
 
     function auctionEnd() public returns(bool){
         require(msg.sender == beneficiary,
-        "Only beneficiary can call this function"
-        );
+          "Only beneficiary can call this function");
         require(block.timestamp > endAuctionDay,
           "Auction isn't ended yet");
-        emit AuctionEnded(highestBidder, highestBid);
-        beneficiary.transfer(highestBid - withdrawn);
+        takeHighestBid();
         closeIt();
         return true;
     }
 
+    function takeHighestBid() internal {
+        require(highestBid > millestone,
+          "millestone wasn't reached");
+          if(highestBid > withdrawn) {
+            if (beneficiary.send(highestBid - withdrawn)){
+              withdrawn = highestBid;
+              emit AuctionEnded(highestBidder, highestBid);
+          }
+        }
+    }
+
     function takeMillestone() internal {
-        if(highestBid > millestone){
+        if (highestBid > millestone) {
             uint advance = highestBid - withdrawn;
-            if(advance > 100) {
-                if (beneficiary.send(advance)){
+            if(advance > 250000000000) {
+                if (beneficiary.send(advance)) {
                   withdrawn += advance;
                 }
             }
@@ -168,6 +189,8 @@ contract ChocoPowerAuction{
     }
 
     function myPendingFunds() public view returns (uint){
+      require(msg.sender != highestBidder,
+        "Highest bidder have not pending funds");
         return pendingReturns[msg.sender].amount;
     }
 
@@ -189,12 +212,21 @@ contract ChocoPowerAuction{
     }
 
     function withdrawPendings() public returns(uint){
+        if (!open) {
+            require(msg.sender != highestBidder,
+              "You are the winner! The price is yours");
+            if (crowdWinning) {
+              require(pendingReturns[msg.sender].kind != Fund.crowd,
+                "Crowd funders are winners and cannot retire founds");
+            }
+        }
+        require(msg.sender != beneficiary,
+          "Beneficiary cannot use this function");
         require(pendingReturns[msg.sender].amount > 0,
-        "You don't have any funds on this contract"
-        );
-        if(highestBid >= millestone){
+          "You don't have any funds on this contract");
+        if (open) {
             require(pendingReturns[msg.sender].kind == Fund.lone,
-            "After reached the millestone only lone funders can retire funds");
+              "Only lone funders can retire pending funds before end of auction");
         }
         uint amount = pendingReturns[msg.sender].amount;
         pendingReturns[msg.sender].amount = 0;
@@ -202,7 +234,7 @@ contract ChocoPowerAuction{
             pendingReturns[msg.sender].amount = amount;
             return 0;
         }
-        if(pendingReturns[msg.sender].kind == Fund.crowd){
+        if (pendingReturns[msg.sender].kind == Fund.crowd && !open) {
             crowdAmount -= amount;
         }
         return amount;
