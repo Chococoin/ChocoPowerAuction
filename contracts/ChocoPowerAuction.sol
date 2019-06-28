@@ -85,31 +85,7 @@ contract ChocoPowerAuction{
         return true;
     }
 
-    function chocoPowerFundingCrowd() public returns(bool) {
-        require(msg.sender != beneficiary,
-          "Beneficiary cannot use this function");
-        require(pendingReturns[msg.sender].kind == Fund.lone,
-          "Kind of fund isn't lone");
-        require(pendingReturns[msg.sender].amount > 0 || msg.sender == highestBidder,
-          "Pending funds must be greater than Zero");
-        pendingReturns[msg.sender].kind = Fund.crowd;
-        if (pendingReturns[msg.sender].amount > 0) {
-            crowdAmount += pendingReturns[msg.sender].amount;
-        }
-        if (highestBidder == crowdsPot) {
-            highestBid += pendingReturns[msg.sender].amount;
-        }
-        if (highestBidder == msg.sender) {
-            pendingReturns[msg.sender] = Funder({ amount: highestBid, kind: Fund.crowd });
-            crowdAmount += highestBid;
-            highestBidder = crowdsPot;
-            highestBid = crowdAmount;
-            crowdWinning = true;
-        }
-        return true;
-    }
-
-    function rebid(Fund _kind) public payable isOpen returns(bool){
+        function rebid(Fund _kind) public payable isOpen returns(bool){
         require(pendingReturns[msg.sender].kind == _kind,
           "You have to rebid using the same kind of your bid as argument");
         if (_kind == Fund.lone) {
@@ -153,6 +129,30 @@ contract ChocoPowerAuction{
         emit HighestBidIncreased(highestBidder, highestBid);
         takeMillestone();
         closeIt();
+        return true;
+    }
+
+    function chocoPowerFundingCrowd() public returns(bool) {
+        require(msg.sender != beneficiary,
+          "Beneficiary cannot use this function");
+        require(pendingReturns[msg.sender].kind == Fund.lone,
+          "Kind of fund isn't lone");
+        require(pendingReturns[msg.sender].amount > 0 || msg.sender == highestBidder,
+          "Pending funds must be greater than Zero");
+        pendingReturns[msg.sender].kind = Fund.crowd;
+        if (pendingReturns[msg.sender].amount > 0) {
+            crowdAmount += pendingReturns[msg.sender].amount;
+        }
+        if (highestBidder == crowdsPot) {
+            highestBid += pendingReturns[msg.sender].amount;
+        }
+        if (highestBidder == msg.sender) {
+            pendingReturns[msg.sender] = Funder({ amount: highestBid, kind: Fund.crowd });
+            crowdAmount += highestBid;
+            highestBidder = crowdsPot;
+            highestBid = crowdAmount;
+            crowdWinning = true;
+        }
         return true;
     }
 
