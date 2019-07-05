@@ -69,4 +69,4 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   && apk del .build-deps-yarn
 RUN npm install -g truffle ganache-cli
 COPY . /app
-CMD cd app && cd client && npm start
+EXPOSE 8545
