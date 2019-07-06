@@ -228,13 +228,10 @@ contract ChocoPowerAuction{
         if (!open) {
             require(msg.sender != highestBidder,
               "You are the winner! The price is yours");
-<<<<<<< HEAD
             if (crowdWinning) {
               require(pendingReturns[msg.sender].kind != Fund.crowd,
                 "Crowd funders are winners and cannot retire founds");
             }
-=======
->>>>>>> Working version. takeMillestone function disable.
         }
         require(msg.sender != beneficiary,
           "Beneficiary cannot use this function");
@@ -244,13 +241,10 @@ contract ChocoPowerAuction{
             require(pendingReturns[msg.sender].kind == Fund.lone,
               "Only lone funders can retire pending funds before end of auction");
         }
-<<<<<<< HEAD
         if (!open) {
             require(msg.sender != highestBidder, 
               "You are the winner! The price is yours");
         }
-=======
->>>>>>> Working version. takeMillestone function disable.
         uint amount = pendingReturns[msg.sender].amount;
         pendingReturns[msg.sender].amount = 0;
         if (!msg.sender.send(amount)) {
